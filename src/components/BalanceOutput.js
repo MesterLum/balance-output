@@ -76,9 +76,18 @@ BalanceOutput.propTypes = {
 };
 
 export default connect(state => {
-  let balance = [];
+
 
   /* YOUR CODE GOES HERE */
+
+  let balance = utils.filterByCriterias(state.journalEntries, state.userInput, state.accounts)
+
+  balance.sort((b1, b2) => {
+    if (b1.ACCOUNT < b2.ACCOUNT) return -1
+    else if (b1.ACCOUNT > b2.ACCOUNT) return 1
+    else return 0
+  })
+
 
   const totalCredit = balance.reduce((acc, entry) => acc + entry.CREDIT, 0);
   const totalDebit = balance.reduce((acc, entry) => acc + entry.DEBIT, 0);

@@ -56,3 +56,57 @@ export const parseUserInput = str => {
     format
   };
 }
+
+
+export const filterByCriterias = (journalEntries, userInput, accounts) => {
+
+  let balance = []
+
+  var { startAccount, endAccount, startPeriod, endPeriod } = userInput
+
+  // MAKING IT AS EASY AS POSIBLE TO FILTER
+  // Trying to save conditions
+  startAccount = startAccount ? startAccount : -99999999
+  endAccount = endAccount ? endAccount : 99999999
+
+  // Min date possible
+  startPeriod = startPeriod && startPeriod.getTime() ? startPeriod : new Date(-8640000000000000)
+  // Max date possible
+  endPeriod = endPeriod && endPeriod.getTime() ? endPeriod : new Date(8640000000000000)
+
+
+  journalEntries.map(journal => {
+    const { ACCOUNT, DEBIT, CREDIT, PERIOD } = journal
+
+    const account = accounts.find(account => account.ACCOUNT === ACCOUNT)
+
+    if (!account) return
+
+
+    // Making it simple
+    if (!(ACCOUNT >= startAccount && ACCOUNT <= endAccount))
+      return
+
+    if (!(PERIOD >= startPeriod && PERIOD <= endPeriod))
+      return
+
+    let balanceIndex = balance.findIndex(balance => balance.ACCOUNT === ACCOUNT)
+
+
+    if (balanceIndex > -1) {
+      balance[balanceIndex].CREDIT += CREDIT
+      balance[balanceIndex].DEBIT += DEBIT
+      balance[balanceIndex].BALANCE = balance[balanceIndex].DEBIT - balance[balanceIndex].CREDIT
+    } else {
+      balance.push({
+        ACCOUNT,
+        DEBIT,
+        CREDIT,
+        BALANCE: DEBIT - CREDIT,
+        DESCRIPTION: account.LABEL
+      })
+    }
+  })
+
+  return balance
+}
